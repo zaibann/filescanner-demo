@@ -12,7 +12,7 @@ jobs:
             args: "--target aarch64-apple-darwin"
           - platform: "macos-13" # for Intel based macs.
             args: "--target x86_64-apple-darwin"
-          - platform: "ubuntu-22.04" # for Tauri v1 you could have used ubuntu-latest (ubuntu-20.04)
+          - platform: "ubuntu-24.04" # Tauri v2 needs webkitgtk 4.1+.
             args: ""
           - platform: "windows-latest"
             args: ""
@@ -22,11 +22,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-24.04'
         # You can remove libayatana-appindicator3-dev if you don't use the system tray feature.
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.0-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libjavascriptcoregtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: setup node
         uses: actions/setup-node@v4
@@ -46,3 +46,10 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         with:
           args: ${{ matrix.args }}
+
+      - name: upload bundles
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauri-bundle-${{ matrix.platform }}
+          path: src-tauri/target/release/bundle/**
