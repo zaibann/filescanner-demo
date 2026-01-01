@@ -10,12 +10,16 @@ jobs:
         include:
           - platform: "macos-latest" # for Arm based macs (M1 and above).
             args: "--target aarch64-apple-darwin"
-          - platform: "macos-13" # for Intel based macs.
+            target: "aarch64-apple-darwin"
+          - platform: "macos-15-intel" # for Intel based macs.
             args: "--target x86_64-apple-darwin"
+            target: "x86_64-apple-darwin"
           - platform: "ubuntu-24.04" # Tauri v2 needs webkitgtk 4.1+.
             args: ""
+            target: ""
           - platform: "windows-latest"
             args: ""
+            target: ""
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -37,7 +41,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || matrix.platform == 'macos-13' && 'x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.target }}
 
       - name: install dependencies
         run: npm install
@@ -52,4 +56,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tauri-bundle-${{ matrix.platform }}
-          path: src-tauri/target/release/bundle/**
+          path: src-tauri/target/**/release/bundle/**
